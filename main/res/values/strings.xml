@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">searchONmaps</string>
+    <string name="map_key" translatable="false">AIzaSyD-kqkgz9ELXfUJuhlaVXFXWIibJJiXpvw</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="sizes">
+
+        <item>Select a value</item>
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+
+    </string-array>
+
+    <string-array name="show_alarm">
+
+        <item>Select a value</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>ALL</item>
+
+
+    </string-array>
+
+
+    <!--    AIzaSyD-kqkgz9ELXfUJuhlaVXFXWIibJJiXpvw-->
+</resources>
