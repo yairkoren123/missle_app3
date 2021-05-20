@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +35,8 @@ import com.example.yy.DATA.Citys;
 import com.example.yy.DATA.Enter_data_text;
 import com.example.yy.DATA.SelctedItem;
 import com.example.yy.RoomDataBase.AllTaskTable;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -67,8 +70,7 @@ import static com.example.yy.R.color.white;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnInfoWindowClickListener
-        , GoogleMap.InfoWindowAdapter , CallbackInterface {
-
+        , GoogleMap.InfoWindowAdapter, CallbackInterface {
 
 
     GoogleMap map;
@@ -77,14 +79,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     int WIDTH_MESSAGE = width_icon;
     int HEIGHT_MASSAGE = height_icon;
-
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private Button button_loc;
     ProgressDialog progressDialog; // pro
     SupportMapFragment mapFragment;
     private TextView last_alarm_main;
+    Location the_location;
     boolean is_there_bool = false;
     boolean find_from_text = false;
     boolean dont_need_to_add = false;
     ImageButton setting_button;
+    ImageButton location_button;
     LatLng newlatlng;
     String the_setting_dark_mode_main = "true";
     ArrayList<String> not_found = new ArrayList<>();
@@ -99,6 +104,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public String the_selected_value = " ";
     boolean dont_need_geo = false;
     ArrayList<String> not_again_array = new ArrayList<>();
+    TextView text_location;
 
     public void setThe_selected_value(String the_selected_value) {
         this.the_selected_value = the_selected_value;
@@ -158,7 +164,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 setting_button.setVisibility(View.GONE);
 
 
-
                 selectedFragment = new Missle_fragment(this);
             }
             getSupportFragmentManager().beginTransaction()
@@ -175,12 +180,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         String the_setting_intent_data = getIntent().getStringExtra("data");
         String the_setting_dark_mode = getIntent().getStringExtra("dark"); // true or false
 
-        if (the_setting_intent_data == null || the_setting_intent_size == null){
-            Log.d("return2", "onCreate: size : "+ the_setting_intent_size +
-                    " data : " +the_setting_intent_data + " dark : " +the_setting_dark_mode);
-        }else {
-            Log.d("return", "onCreate: size : "+ the_setting_intent_size +
-                    " data : " +the_setting_intent_data + " dark : " +the_setting_dark_mode);
+        if (the_setting_intent_data == null || the_setting_intent_size == null) {
+            Log.d("return2", "onCreate: size : " + the_setting_intent_size +
+                    " data : " + the_setting_intent_data + " dark : " + the_setting_dark_mode);
+        } else {
+            Log.d("return", "onCreate: size : " + the_setting_intent_size +
+                    " data : " + the_setting_intent_data + " dark : " + the_setting_dark_mode);
             // if all pass good :
 
             // size icon :
@@ -195,10 +200,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             //dark mode in on map ready:
             the_setting_dark_mode_main = the_setting_dark_mode;
-            if (the_setting_dark_mode.equals("true")){
+            if (the_setting_dark_mode.equals("true")) {
                 // is dark
                 dark_setting = true;
-            }else{ // the light mode :
+            } else { // the light mode :
                 dark_setting = false;
 
             }
@@ -285,7 +290,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 //        thread.start();
         //goup();
 
-
+        //setting
         last_alarm_main = findViewById(R.id.last_alarm_main_text);
         setting_button = findViewById(R.id.settings);
         setting_button.setOnClickListener(new View.OnClickListener() {
@@ -293,7 +298,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 Log.d("whynot", "onClick: ");
 
-                Intent intent = new Intent(MainActivity.this,Setting_activity.class);
+                Intent intent = new Intent(MainActivity.this, Setting_activity.class);
                 intent.putExtra("width_size", width_icon);
                 intent.putExtra("data", data_lenght_setting);
                 startActivity(intent);
@@ -305,10 +310,28 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
         progressDialog_call();
 
-    }
 
+        //del
+//        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+//
+//        // method to get the location
+//        text_location = findViewById(R.id.textlocation);
+//        Timer myTimer1 = new Timer ();
+//        TimerTask myTask1 = new TimerTask () {
+//            @Override
+//            public void run () {
+//                requestNewLocationData();
+//                Log.d("timer", "run: agian");
+//            }
+//        };
+//
+//        myTimer1.scheduleAtFixedRate(myTask1 , 0l, 1 * (60*200)); //
+//        getLastLocation();
+
+    }
 
 
     public void progressDialog_call() {
@@ -361,18 +384,35 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         MapStyleOptions style;
 
+
+        // newlatlng;
+        MarkerOptions m;
+        m = new MarkerOptions();
+        if (newlatlng != null) {
+            Log.d("yep", "onMapReady: " + newlatlng.longitude + " n " + newlatlng.latitude);
+
+            m.position(newlatlng)
+                    .title("me")
+                    .snippet("hii")
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap("red_cool5", width_icon, height_icon)));
+            map.addMarker((m));
+        }
+
         // from setting
-       if (dark_setting == true) {
-           style = MapStyleOptions.loadRawResourceStyle(this, R.raw.night);
-           map.setMapStyle(style);
+        if (dark_setting == true) {
+            style = MapStyleOptions.loadRawResourceStyle(this, R.raw.night);
+            map.setMapStyle(style);
 
 
-           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-       }else if(dark_setting == false){
-           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else if (dark_setting == false) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
         map.setOnInfoWindowClickListener(this);
+
+
     }
+
 
     @Override
     public void onInfoWindowClick(Marker marker) {
@@ -494,8 +534,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    GoogleApiClient googleApiClient;
+
     @SuppressLint("ResourceAsColor")
     public void goup() {
+
 
         //map.clear();
 
@@ -545,8 +588,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                     continue;
                                 }
                             }
-                            if (dont_need_geo == false){
-                                addressesList = geocoder.getFromLocationName(location,1);
+                            if (dont_need_geo == false) {
+                                addressesList = geocoder.getFromLocationName(location, 1);
 
                             }
                             dont_need_geo = false;
@@ -567,20 +610,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     if (result == null || result[0] == 0 || result[1] == 0) {
 
 
-
                         for (int j = 0; j < not_found.size(); j++) {
 
                             Log.d("dontneed", "goup: " + not_found.get(j));
-                            if (not_found.get(j).equals(location)){
+                            if (not_found.get(j).equals(location)) {
                                 dont_need_to_add = true;
                                 continue;
                             }
                         }
-                        if (dont_need_to_add == false){
+                        if (dont_need_to_add == false) {
                             not_found.add(location);
                         }
                         dont_need_to_add = false;
-
 
 
                         Log.d("dont", "goup: not found : " + location);
@@ -618,7 +659,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                     .title(location)
                                     .snippet(snippet)
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap("red_cool3", width_icon, height_icon)));
-                            map.addMarker((markerOptions));
+                            Marker marker = map.addMarker(markerOptions);
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
                             the_selected_value = " ";
 
@@ -673,7 +714,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         progressDialog.dismiss();
 
 
-
     }
 
     //thread
@@ -712,7 +752,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 //            String[] split_the_time_hours_2 = split_the_now_time_hours.split(":");
 //            int clu_data = Integer.parseInt(split_the_now_time_hours_1[0]);
 //            Log.d("time3", "is_before_time: " + clu_data);
-
 
 
             return true;
@@ -771,6 +810,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    private void message(String text) {
+        Toast.makeText(MainActivity.this, text
+                , Toast.LENGTH_LONG)
+                .show();
+    }
+
     @Override
     public void data(ArrayList<Citys> data, HashMap<String, String> getTimeTromHas) {
         if (data != null && getTimeTromHas != null) {
@@ -782,8 +827,53 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("callb", "data: my data : " + getTimeTromHas);
 
     }
-
 }
+
+// the location
+//    private void getlocation() {
+//        button_loc = findViewById(R.id.button_loc);
+//        text_location = findViewById(R.id.textlocation);
+//        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+//        button_loc.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//
+//                    if (getApplicationContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+//                            == PackageManager.PERMISSION_GRANTED) {
+//                        // get the ocation
+//
+//                        fusedLocationProviderClient.getLastLocation()
+//                                .addOnSuccessListener(new OnSuccessListener<Location>() {
+//                                    @Override
+//                                    public void onSuccess(Location location) {
+//                                        if (location != null) {
+//                                            Double lat = location.getLatitude();
+//                                            Double longt = location.getLongitude();
+//                                            newlatlng = new LatLng(lat,longt);
+//                                            text_location.setText(lat + " : " + longt);
+//                                            Log.d("idid", "onSuccess: " + (lat + " : " + longt));
+//                                            message("secses");
+//                                        }
+//                                    }
+//                                }).addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                message("not good");
+//                            }
+//                        });
+//
+//                    } else {
+//                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+//                    }
+//                }
+//            }
+//
+//        });
+//    }
+//}
+
 
 
     //        Toast.makeText(MainActivity.this,
