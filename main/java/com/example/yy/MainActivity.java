@@ -136,6 +136,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 // show map view
                 in_map = true;
                 last_alarm_main.setVisibility(View.VISIBLE);
+                setting_button.setVisibility(View.VISIBLE);
 
                 //map.clear();
                 if (!first_time) {
@@ -154,6 +155,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                 in_map = false;
                 last_alarm_main.setVisibility(View.GONE);
+                setting_button.setVisibility(View.GONE);
+
 
 
                 selectedFragment = new Missle_fragment(this);

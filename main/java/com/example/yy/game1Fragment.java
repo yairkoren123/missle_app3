@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment;
 
 public class game1Fragment extends Fragment {
 
+    //Todo add a cool animations
+
 
     public game1Fragment() {
     }

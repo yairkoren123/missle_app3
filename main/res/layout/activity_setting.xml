@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Setting_activity">
+    tools:context=".Setting_activity"
+    android:orientation="vertical">
 
 
         <androidx.cardview.widget.CardView
@@ -128,14 +129,17 @@
 
 
         </androidx.cardview.widget.CardView>
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/games"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:id="@+id/fragment_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
 
 
-</LinearLayout>
+    </FrameLayout>
+
+
+    </LinearLayout>

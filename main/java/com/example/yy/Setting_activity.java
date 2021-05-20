@@ -11,6 +11,7 @@ import android.widget.Switch;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 
@@ -157,44 +158,7 @@ public class Setting_activity extends AppCompatActivity {
             }
         });
 
-//        sw_dark_mode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    sw_dark_mode.setText("Light");
-//                    button_switch = false;
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//
-//                } else {
-//                    sw_dark_mode.setText("Dark");
-//
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//
-//                    dark_mode();
-//                    button_switch = true;
-//                }
-//            }
-//        });
 
-//        sw_dark_mode.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                if (button_switch == true){
-//                    sw_dark_mode.setText("Light");
-//                    button_switch = false;
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//
-//                } else{
-//                    sw_dark_mode.setText("Dark");
-//
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//
-//                    dark_mode();
-//                    button_switch = true;
-//                }
-//            }
-//        });
 
         save_button.setOnClickListener(v -> {
 
@@ -227,7 +191,19 @@ public class Setting_activity extends AppCompatActivity {
 
             Log.d("returns", "onCreate:  size : " + the_selected_size + " data :  " + the_selected_data);
 
+
+
+
+
         });
+
+        // fragment :
+
+        Fragment selectedFragment = null;
+        selectedFragment = new game1Fragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_layout, selectedFragment).commit();
     }
 
 
